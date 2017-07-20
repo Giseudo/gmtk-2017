@@ -42,6 +42,8 @@ function bomb:new(position, size, polarity)
 				enter = function(self, previous)
 				end,
 				update = function(self, dt)
+					local position = Game.sparkle.transform.position:clone()
+
 					if math.abs(Game.sparkle.transform.position.y - o.transform.position.y) > 100 then
 						o.state:switch('idle')
 					end
@@ -50,10 +52,21 @@ function bomb:new(position, size, polarity)
 						o.state:switch('idle')
 					end
 
-					if o.transform.position.x < Game.sparkle.transform.position.x then
-						o.controller:move_right()
+					if Game.sparkle.transform.facing == 'forward' then
+						position.x = position.x + 50
 					else
+						position.x = position.x - 50
+					end
+
+					if o.transform.position.x < position.x then
+						o.controller:move_right()
+					elseif o.transform.position.x > position.x then
 						o.controller:move_left()
+					end
+
+					if math.abs(position.x - o.transform.position.x) < 30 then
+						o.controller.forward = false
+						o.controller.backward = false
 					end
 
 					for _, other in pairs(Roda.physics.quadtree) do

@@ -62,6 +62,11 @@ function skeleton:new(position, size, polarity)
 						o.state:switch('attacking')
 					end
 
+					if math.abs(Game.sparkle.transform.position.x - o.transform.position.x) < 30 then
+						o.controller.forward = false
+						o.controller.backward = false
+					end
+
 					for _, other in pairs(Roda.physics.quadtree) do
 						if other.tiles == nil then
 							if other.name ~= 'bomb' then

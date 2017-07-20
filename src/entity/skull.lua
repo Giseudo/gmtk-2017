@@ -23,6 +23,7 @@ function skull:new(position, size, polarity)
 	o.collider = Collider(Rect(position, size), false)
 	o.controller = Controller(0.15)
 	o.sprite = Sprite('2_skull_' .. o.polarity, 'assets/textures/skull_' .. o.polarity .. '.png', 240, 275, 0, 7)
+	o.berserk = false
 	o.enemy = true
 	o.animator = Animator('idle', 0, 1)
 	o.animator:add_animation('attacking', 2, 3, 0.06)
@@ -48,19 +49,26 @@ function skull:new(position, size, polarity)
 					o.animator:set_animation('idle')
 				end,
 				update = function(self, dt)
+					local speed = 2
 					self.timer = self.timer + dt
 
+					if o.berserk then
+						speed = 4
+					end
+
 					if o.polarity == 'light' then
-						o.transform.position.y = o.transform.position.y + math.sin(self.timer * math.pi)
-						o.transform.position.x = o.transform.position.x + math.cos(self.timer * math.pi)
+						o.transform.position.y = o.transform.position.y + 30 * math.sin(self.timer * math.pi) * speed * dt
+						o.transform.position.x = o.transform.position.x + 30 * math.cos(self.timer * math.pi) * speed * dt
 					else
-						o.transform.position.y = o.transform.position.y - math.sin(self.timer * math.pi)
-						o.transform.position.x = o.transform.position.x - math.cos(self.timer * math.pi)
+						o.transform.position.y = o.transform.position.y - 30 * math.sin(self.timer * math.pi) * speed * dt
+						o.transform.position.x = o.transform.position.x - 30 * math.cos(self.timer * math.pi) * speed * dt
 					end
 
 					o.transform.position = o.transform.position + (self.position - o.transform.position) * dt
 
-					if self.timer > 3 and o.polarity == 'dark' or self.timer > 4 and o.polarity == 'light' then
+					if self.timer > 3 and o.berserk == true and o.polarity == 'dark' then
+						o.state:switch('shifting')
+					elseif self.timer > 3 and o.polarity == 'dark' or self.timer > 4 and o.polarity == 'light' then
 						o.state:switch('attacking')
 					end
 				end
@@ -135,8 +143,10 @@ function skull:new(position, size, polarity)
 						self.firing = true
 						self.timer = self.timer + dt
 
-						if self.timer > 2.5 then
+						if self.timer > 2.5 and o.berserk == false then
 							o.state:switch('shifting')
+						elseif self.timer > 2.5 and o.berserk then
+							o.state:switch('idle')
 						end
 					end
 

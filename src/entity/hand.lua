@@ -67,11 +67,14 @@ function hand:new(position, size, polarity)
 			attacking = {
 				timer = 0,
 				enter = function(self, previous)
+					self.position = o.transform.position:clone()
 					o.animator:set_animation('attacking')
 					self.timer = 0
 				end,
 				update = function(self, dt)
 					self.timer = self.timer + dt
+
+					o.transform.position.y = o.transform.position.y + (self.position.y + 80 - o.transform.position.y) * 4 * dt
 
 					if Game.sparkle.polarity ~= o.polarity then
 						if Vector.distance(Game.sparkle.transform.position, o.transform.position) < 70 then
@@ -111,7 +114,7 @@ function hand:new(position, size, polarity)
 
 					o.transform.position = o.transform.position + (position - o.transform.position) * 3 * dt
 
-					if Vector.distance(o.transform.position, self.old) < 7 and self.timer > 3 then
+					if Vector.distance(o.transform.position, self.old) < 6 and self.timer > 3 then
 						self.timer = 0
 						o.state:switch('moving')
 					end
