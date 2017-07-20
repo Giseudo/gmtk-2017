@@ -18,7 +18,7 @@ function bomb:new(position, size, polarity)
 	o.polarity = polarity or 'dark'
 	o.body = Body(Vector(0, 0), Vector(0, 0), Vector(-1.5, -1.5), 15)
 	o.collider = Collider(Rect(position, size))
-	o.controller = Controller(1)
+	o.controller = Controller(2)
 	o.sprite = Sprite('bomb_' .. o.polarity, 'assets/textures/bomb_' .. o.polarity .. '.png', 60, 65, 0, 2)
 	o.enemy = Enemy('explosive')
 	o.animator = Animator('moving', 0, 7)
@@ -31,7 +31,7 @@ function bomb:new(position, size, polarity)
 					o.animator:set_animation('moving')
 				end,
 				update = function(self, dt)
-					if math.abs(Game.sparkle.transform.position.y - o.transform.position.y) < 50 then
+					if math.abs(Game.sparkle.transform.position.y - o.transform.position.y) < 200 then
 						if math.abs(Game.sparkle.transform.position.x - o.transform.position.x) < 200 then
 							o.state:switch('rolling')
 						end
@@ -74,7 +74,7 @@ function bomb:new(position, size, polarity)
 						end
 					end
 
-					if Vector.distance(o.transform.position, Game.sparkle.transform.position) < 50 then
+					if Vector.distance(o.transform.position, Game.sparkle.transform.position) < 55 then
 						o.state:switch('exploding')
 					end
 				end
@@ -88,7 +88,7 @@ function bomb:new(position, size, polarity)
 					self.timer = self.timer + dt
 
 					if self.timer > 0.3 and self.timer < 0.4 then
-						if Vector.distance(o.transform.position, Game.sparkle.transform.position) < 50 then
+						if Vector.distance(o.transform.position, Game.sparkle.transform.position) < 55 then
 							if o.polarity ~= Game.sparkle.polarity then
 								Game.sparkle.hurting = true
 							end

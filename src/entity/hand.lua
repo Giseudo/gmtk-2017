@@ -37,8 +37,10 @@ function hand:new(position, size, polarity)
 			moving = {
 				timer = 0,
 				position = o.transform.position,
+				chain = 1,
 				enter = function(self, previous)
 					o.animator:set_animation('idle')
+					self.chain = self.chain + 1
 					self.timer = 0
 				end,
 				update = function(self, dt)
@@ -51,7 +53,13 @@ function hand:new(position, size, polarity)
 					end
 					o.transform.position = o.transform.position + (self.position - o.transform.position) * dt
 
-					if self.timer > 6 then
+					if self.timer > 4 and self.chain > 1 and o.polarity == 'light' or
+						self.timer > 4 and self.chain > 2 and o.polarity == 'dark' then
+						self.timer = 0
+						self.chain = 0
+						o.state:switch('pushing')
+					elseif self.timer > 4 and o.polarity == 'light' or
+						self.timer > 4 and o.polarity == 'dark'then
 						o.state:switch('attacking')
 					end
 				end
@@ -74,6 +82,37 @@ function hand:new(position, size, polarity)
 					end
 
 					if self.timer > 1.5 then
+						o.state:switch('moving')
+					end
+				end
+			},
+			pushing = {
+				timer = 0,
+				enter = function(self, previous)
+					self.old = o.transform.position:clone()
+					self.position = o.transform.position:clone()
+
+					if o.polarity == 'light' then
+						self.position.x = self.position.x + 120
+					else
+						self.position.x = self.position.x - 120
+					end
+
+					self.position.y = self.position.y - 100
+				end,
+				update = function(self, dt)
+					local position = self.position
+
+					self.timer = self.timer + dt
+
+					if self.timer > 3 then
+						self.position = self.old
+					end
+
+					o.transform.position = o.transform.position + (position - o.transform.position) * 3 * dt
+
+					if Vector.distance(o.transform.position, self.old) < 7 and self.timer > 3 then
+						self.timer = 0
 						o.state:switch('moving')
 					end
 				end

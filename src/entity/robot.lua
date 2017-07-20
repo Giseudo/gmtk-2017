@@ -38,24 +38,19 @@ function robot:new(position, size, polarity)
 			},
 			chasing = {
 				timer = 0,
+				first_shoot = true,
 				enter = function(self, previous)
+					robot.shoot(o)
+					self.timer = 0
 				end,
 				update = function(self, dt)
 					self.timer = self.timer + dt
-
-					if math.abs(Game.sparkle.transform.position.y - o.transform.position.y) > 100 then
-						o.state:switch('flying')
-					end
-
-					if math.abs(Game.sparkle.transform.position.x - o.transform.position.x) > 150 then
-						o.state:switch('flying')
-					end
 
 					if o.transform.position.y > 100 then
 						o.transform.position.y = 100
 					end
 
-					if Vector.distance(o.transform.position, Game.sparkle.transform.position) > 130 then
+					if math.abs(o.transform.position.x - Game.sparkle.transform.position.x) < 130 then
 						if o.transform.position.x < Game.sparkle.transform.position.x then
 							o.controller:move_right()
 						else
@@ -63,31 +58,16 @@ function robot:new(position, size, polarity)
 						end
 					end
 
-					if o.transform.position.y - 40 < Game.sparkle.transform.position.y then
-						o.controller:move_up()
-					else
-						o.controller:move_down()
-					end
+					o.transform.position.y = o.transform.position.y + math.sin(self.timer * math.pi) * 0.5
+					o.transform.position.y = o.transform.position.y + (Game.sparkle.transform.position.y - o.transform.position.y) * 0.4 * dt
 
 					if self.timer > 3 then
-						local file = 'assets/textures/enemy_bullet_' .. o.polarity .. '.png'
-						local target = Game.sparkle.transform.position
-						local position = o.transform.position
-						local direction = Vector(target.x - position.x, target.y - position.y)
-
-						Roda.bus:emit('world/add', Bullet(
-							'enemy',
-							'enemy_bullet' .. o.polarity,
-							file,
-							position,
-							rotation,
-							Vector(4, 4),
-							direction:normalized(),
-							100,
-							o.polarity
-						))
-
+						robot.shoot(o)
 						self.timer = 0
+					end
+
+					if Vector.distance(o.transform.position, Game.sparkle.transform.position) < 15 and o.polarity ~= Game.sparkle.polarity and Game.sparkle.controller.dashing == false then
+						Game.sparkle.hurting = true
 					end
 
 					if Vector.distance(o.transform.position, Game.sparkle.transform.position) > 300 then
@@ -119,6 +99,25 @@ function robot:new(position, size, polarity)
 	o.body.kinematic = true
 
 	return setmetatable(o, robot)
+end
+
+function robot:shoot()
+	local file = 'assets/textures/enemy_bullet_' .. self.polarity .. '.png'
+	local target = Game.sparkle.transform.position
+	local position = self.transform.position
+	local direction = Vector(target.x - position.x, target.y - position.y)
+
+	Roda.bus:emit('world/add', Bullet(
+		'enemy',
+		'enemy_bullet' .. self.polarity,
+		file,
+		position,
+		rotation,
+		Vector(4, 4),
+		direction:normalized(),
+		100,
+		self.polarity
+	))
 end
 
 return setmetatable(robot, { __call = robot.new })

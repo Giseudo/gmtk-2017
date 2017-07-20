@@ -65,12 +65,14 @@ function Game:run()
 	Roda.bus:register('input/keyboard/pressed', function(key)
 		if key == 'p' then
 			if Roda.state == 'game' then
-				Roda.bus:emit('scene/load', 'temp')
 				Roda.state = 'editor'
+				Roda.debug = true
+				Roda.bus:emit('scene/save', 'temp')
 				self:unbind()
 			else
 				Roda.bus:emit('scene/save', 'temp')
 				Roda.state = 'game'
+				Roda.debug = false
 				self:bind()
 			end
 		end
@@ -79,6 +81,7 @@ function Game:run()
 			if Roda.state == 'intro' then
 				if menu_index == 0 then
 					Roda.state = 'game'
+					Roda.bus:emit('scene/save', 'entities')
 					self:bind()
 				else
 					love.event.quit()
@@ -216,7 +219,7 @@ function Game:place_entities()
 	-- Create entities
 	self.waterfall = Waterfall(Vector(-3700, -35))
 	self.rocks = Rocks(Vector(-3700, -30))
-	self.boss = Boss(Vector(2000, 0))
+	self.boss = Boss(Vector(1500, 0))
 	self.sparkle = Sparkle(Vector(-3700, 0), Vector(16, 32))
 	self.sparkle.controller.player = true
 

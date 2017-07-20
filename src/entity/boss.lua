@@ -14,10 +14,10 @@ function boss:new(position)
 
 	o.name = 'boss'
 	o.transform = Transform(position)
-	o.hand_1 = Hand(position + Vector(-150, 0), Vector(100, 80), 'light')
-	o.hand_2 = Hand(position + Vector(150, 0), Vector(100, 80), 'dark')
-	o.skull_1 = Skull(position + Vector(-50, 80), Vector(40, 40), 'light')
-	o.skull_2 = Skull(position + Vector(50, 80), Vector(40, 40), 'dark')
+	o.hand_1 = Hand(position + Vector(-170, 0), Vector(100, 80), 'light')
+	o.hand_2 = Hand(position + Vector(170, 0), Vector(100, 80), 'dark')
+	o.skull_1 = Skull(position + Vector(-50, 80), Vector(40, 40), 'dark')
+	o.skull_2 = Skull(position + Vector(50, 80), Vector(40, 40), 'light')
 	o.waterfall = Waterfall(position + Vector(0, -35))
 	o.rocks = Rocks(position + Vector(0, -35))
 	o.state = State({
@@ -25,6 +25,8 @@ function boss:new(position)
 		states = {
 			idle = {
 				enter = function(self, previous)
+					o.skull_1.state:switch('intro')
+					o.skull_2.state:switch('intro')
 					Roda.bus:emit('world/add', o.hand_1)
 					Roda.bus:emit('world/add', o.hand_2)
 					Roda.bus:emit('world/add', o.skull_1)
@@ -33,7 +35,7 @@ function boss:new(position)
 					Roda.bus:emit('world/add', o.rocks)
 				end,
 				update = function(self, dt)
-					if math.abs(Game.sparkle.transform.position.x - o.transform.position.x) < 200 then
+					if math.abs(Game.sparkle.transform.position.x - o.transform.position.x) < 150 then
 						o.state:switch('fighting')
 					end
 				end
@@ -41,6 +43,8 @@ function boss:new(position)
 			fighting = {
 				enter = function(self, previous)
 					o.waterfall.state:switch('showing')
+					o.skull_1.state:switch('idle')
+					o.skull_2.state:switch('idle')
 					Roda.bus:emit('camera/target', o)
 					Roda.bus:emit('world/add', Wall(o.transform.position + Vector(-250, 0), Vector(16, 320)))
 					Roda.bus:emit('world/add', Wall(o.transform.position + Vector(250, 0), Vector(16, 320)))

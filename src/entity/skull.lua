@@ -32,8 +32,15 @@ function skull:new(position, size, polarity)
 	o.state = State({
 		current = 'idle',
 		states = {
+			intro = {
+				enter = function(self, previous)
+					o.transform.position.y = o.transform.position.y + 130
+				end,
+				update = function(self, dt)
+				end
+			},
 			idle = {
-				position = o.transform.position,
+				position = position:clone(),
 				timer = 0,
 				delay = 0,
 				enter = function(self, previous)
@@ -43,12 +50,17 @@ function skull:new(position, size, polarity)
 				update = function(self, dt)
 					self.timer = self.timer + dt
 
-					o.transform.position.y = o.transform.position.y + math.sin(self.timer * math.pi);
-					o.transform.position.x = o.transform.position.x + math.cos(self.timer * math.pi);
+					if o.polarity == 'light' then
+						o.transform.position.y = o.transform.position.y + math.sin(self.timer * math.pi)
+						o.transform.position.x = o.transform.position.x + math.cos(self.timer * math.pi)
+					else
+						o.transform.position.y = o.transform.position.y - math.sin(self.timer * math.pi)
+						o.transform.position.x = o.transform.position.x - math.cos(self.timer * math.pi)
+					end
 
 					o.transform.position = o.transform.position + (self.position - o.transform.position) * dt
 
-					if self.timer > 4 then
+					if self.timer > 3 and o.polarity == 'dark' or self.timer > 4 and o.polarity == 'light' then
 						o.state:switch('attacking')
 					end
 				end
@@ -74,7 +86,16 @@ function skull:new(position, size, polarity)
 					self.timer = self.timer + dt
 
 					if Vector.distance(o.transform.position, self.target) > 10 then
-						o.transform.position = o.transform.position + (self.direction:normalized() * 100) * dt
+						local range = 100
+						local speed = 1
+
+						if o.polarity == 'light' then
+							range = 130
+						else
+							speed = 1.5
+						end
+
+						o.transform.position = o.transform.position + (self.direction:normalized() * range) * speed * dt
 					end
 
 					if sparkle.polarity ~= o.polarity then
@@ -83,7 +104,8 @@ function skull:new(position, size, polarity)
 						end
 					end
 
-					if self.timer > 1.35 and self.chain < 2 then
+					if self.timer > 1.35 and self.chain < 3 and o.polarity == 'dark' or
+						self.timer > 1.35 and o.polarity == 'light' and self.chain < 2 then
 						o.state:switch('idle')
 					elseif self.timer > 1.35 then
 						self.chain = 0
@@ -95,7 +117,8 @@ function skull:new(position, size, polarity)
 				timer = 0,
 				firing = false,
 				enter = function(self, previous)
-					self.position = o.state.states['idle'].position
+					self.position = o.state.states['idle'].position:clone()
+					self.position.y = self.position.y + 40
 					self.timer = 0
 					self.firing = false
 					o.animator:set_animation('shooting')
@@ -106,7 +129,7 @@ function skull:new(position, size, polarity)
 
 					if Vector.distance(o.transform.position, self.position) < 5 then
 						if self.firing == false then
-							Roda.bus:emit('world/add', Laser(Vector(position.x, position.y - 155), o.polarity))
+							Roda.bus:emit('world/add', Laser(Vector(self.position.x, self.position.y - 155), o.polarity))
 						end
 
 						self.firing = true
@@ -163,7 +186,7 @@ function skull:new(position, size, polarity)
 			},
 		}
 	})
-	o.health = 15
+	o.health = 17
 	o.hurting = false
 	o.hurting_blink = false
 	o.hurting_timer = 0

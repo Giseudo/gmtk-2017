@@ -14,9 +14,9 @@ function sparkle:new(position, size)
 
 	o.name = 'sparkle'
 	o.transform = Transform(position)
-	o.body = Body(Vector(0, 0), Vector(0, 0), Vector(-1.5, -1.5), 27)
+	o.body = Body(Vector(0, 0), Vector(0, 0), Vector(-1.45, -1.6), 27)
 	o.collider = Collider(Rect(position, size))
-	o.controller = Controller(4.3)
+	o.controller = Controller(3.8)
 	o.sprite = Sprite('2_sparkle', 'assets/textures/sparkle_dark.png', 72, 37, 0, 3)
 	o.animator = Animator('idle', 0, 3)
 	o.animator:add_animation('moving', 4, 1)
@@ -76,23 +76,25 @@ function sparkle:new(position, size)
 					end
 
 					if o.transform.facing == 'forward' then
-						o.body.velocity.x = 40
+						o.body.velocity.x = 35
 					else
-						o.body.velocity.x = -40
+						o.body.velocity.x = -35
 					end
 
 					if o.body.velocity.y ~= 0 then
-						o.body.velocity.y = 14
+						o.body.velocity.y = 18
 					end
 				end,
 				update = function(self, dt)
 					self.timer = self.timer + dt
 
+					--o.body.acceleration.x = o.body.acceleration.x - 300 * dt
+
 					if self.timer > 0.25 then
 						self.timer = 0
-						o.controller.dashing = false
 						o.body.velocity.x = 0
 						o.body.velocity.y = 0
+						o.controller.dashing = false
 
 						if o.controller.flying then
 							o.state:switch('flying')
