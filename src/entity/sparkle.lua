@@ -21,7 +21,7 @@ function sparkle:new(position, size)
 	o.animator = Animator('idle', 0, 3)
 	o.animator:add_animation('moving', 4, 1)
 	o.animator:add_animation('flying', 6, 1)
-	o.animator:add_animation('dash_1', 8, 5, 0.035)
+	o.animator:add_animation('dash_1', 8, 5, 0.05)
 	o.animator:add_animation('dash_2', 14, 5, 0.05)
 	o.animator:add_animation('dying', 20, 12)
 	o.state = State({
@@ -66,8 +66,10 @@ function sparkle:new(position, size)
 			},
 			dashing = {
 				timer = 0,
+				speed = 40,
 				enter = function(self, previous)
 					o.controller.dashing = true
+					self.speed = 40
 
 					if previous == 'flying' then
 						o.animator:set_animation('dash_2')
@@ -75,24 +77,27 @@ function sparkle:new(position, size)
 						o.animator:set_animation('dash_1')
 					end
 
-					if o.transform.facing == 'forward' then
-						o.body.velocity.x = 35
-					else
-						o.body.velocity.x = -35
+					if o.transform.facing == 'backward' then
+						self.speed = self.speed * - 1
 					end
 
+					o.body.velocity.x = self.speed
+
 					if o.body.velocity.y ~= 0 then
-						o.body.velocity.y = 18
+						o.body.velocity.y = 20
 					end
 				end,
 				update = function(self, dt)
 					self.timer = self.timer + dt
 
-					--o.body.acceleration.x = o.body.acceleration.x - 300 * dt
+					if self.timer > 0.10 then
+						local initial = o.body.velocity.x
+						local acceleration = - initial
+						o.body.velocity.x = initial + acceleration * 0.20
+					end
 
-					if self.timer > 0.25 then
+					if self.timer > 0.3 then
 						self.timer = 0
-						o.body.velocity.x = 0
 						o.body.velocity.y = 0
 						o.controller.dashing = false
 

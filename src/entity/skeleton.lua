@@ -110,7 +110,7 @@ function skeleton:new(position, size, polarity)
 				update = function(self, dt)
 					self.timer = self.timer + dt
 
-					if self.timer > 0.5 then
+					if self.timer > 0.45 then
 						Roda.bus:emit('world/remove', o)
 					end
 				end

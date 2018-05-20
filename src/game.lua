@@ -43,6 +43,12 @@ function Game:run()
 
 	Roda.bus:emit('scene/load', 'entities')
 
+	local music = love.audio.newSource('assets/audios/Saluberrimae - Time Is A Flat Circle.mp3')
+	music:setLooping(true)
+
+	love.audio.play(music)
+	love.audio.setVolume(0.08)
+
 	-- Systems
 	Roda.bus:emit('world/add', ItemSystem())
 	Roda.bus:emit('world/add', RenderSystem())
@@ -63,20 +69,6 @@ function Game:run()
 	Roda.scene.camera.transform.position.x = -3700
 
 	Roda.bus:register('input/keyboard/pressed', function(key)
-		if key == 'p' then
-			if Roda.state == 'game' then
-				Roda.state = 'editor'
-				Roda.debug = true
-				Roda.bus:emit('scene/save', 'temp')
-				self:unbind()
-			else
-				Roda.bus:emit('scene/save', 'temp')
-				Roda.state = 'game'
-				Roda.debug = false
-				self:bind()
-			end
-		end
-
 		if key == 'return' then
 			if Roda.state == 'intro' then
 				if menu_index == 0 then
@@ -254,7 +246,7 @@ function Game:draw()
 	Roda:set_shader('default')
 
 	if Roda.state == 'intro' then
-		love.graphics.clear(100, 100, 120, 255)
+		love.graphics.clear(38, 38, 38, 255)
 		love.graphics.draw(
 			self.intro.batch:getTexture(),
 			self.intro.quads[intro_index],

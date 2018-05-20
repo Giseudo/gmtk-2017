@@ -50,16 +50,12 @@ function boss:new(position)
 					Roda.bus:emit('world/add', Wall(o.transform.position + Vector(250, 0), Vector(16, 320)))
 				end,
 				update = function(self, dt)
-					if o.skull_1.health == 0 then
-						o.skull_2.berserk = true
-						o.skull_2.health = o.skull_2.health + 3
-					elseif o.skull_2.health == 0 then
-						o.skull_1.berserk = true
-						o.skull_1.health = o.skull_1.health + 3
-					end
-
 					if o.skull_1.health == 0 and o.skull_2.health == 0 then
 						o.state:switch('dying')
+					elseif o.skull_1.health == 0 then
+						o.skull_2.berserk = true
+					elseif o.skull_2.health == 0 then
+						o.skull_1.berserk = true
 					end
 				end
 			},

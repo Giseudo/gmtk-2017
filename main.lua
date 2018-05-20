@@ -7,6 +7,7 @@ require "src.game"
 local currentTime = love.timer.getTime()
 local acumulator = 0.0
 local frameTime = 0
+local delta = 1 / 60
 
 function love.load()
 	Roda:run()
@@ -21,14 +22,17 @@ function love.update(dt)
 		frameTime = 0.25
 	end
 
+	acumulator = acumulator + frameTime
 	currentTime = newTime
 
-	acumulator = acumulator + frameTime
+	while acumulator >= delta do
+		Roda:update(delta)
+		Game:update(delta)
+		acumulator = acumulator - delta
+	end
 
-	while acumulator >= dt do
-		Roda:update(dt)
-		Game:update(dt)
-		acumulator = acumulator - dt
+	if dt < delta then
+		love.timer.sleep(delta - dt)
 	end
 end
 
